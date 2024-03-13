@@ -22,8 +22,26 @@ from dinov2.eval.setup import get_args_parser as get_setup_args_parser
 from dinov2.eval.setup import setup_and_build_model
 from dinov2.eval.utils import ModelWithNormalize, evaluate, extract_features
 
+#importing necessary packages for viewing concurrent GPU usage
+import time
+import threading
+import subprocess
 
 logger = logging.getLogger("dinov2")
+
+#When 1, end gpu monitoring
+gpuover = 0
+
+#function which runs nvidia-smi command every 3 seconds
+def monitor_gpu(interval=1):
+    while gpuover == 0:
+        try:
+            result = subprocess.run('nvidia-smi', shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+            print('NVIDIA-SMI OUTPUT: ', result.stdout)
+            time.sleep(interval)
+        except subprocess.CalledProcessError as e:
+            print("Error: ", e.stderr)
+            time.sleep(interval)
 
 
 def get_args_parser(
@@ -377,6 +395,10 @@ def eval_knn_with_model(
 
 
 def main(args):
+    #setup & start threading
+    gpu_thread = threading.Thread(target=monitor_gpu)
+    gpu_thread.start()
+
     model, autocast_dtype = setup_and_build_model(args)
     eval_knn_with_model(
         model=model,
@@ -394,6 +416,10 @@ def main(args):
         n_per_class_list=args.n_per_class_list,
         n_tries=args.n_tries,
     )
+
+    gpuover+=1
+    gpu_thread.join()
+
     return 0
 
 
