@@ -3,6 +3,8 @@
 # This source code is licensed under the Apache License, Version 2.0
 # found in the LICENSE file in the root directory of this source tree.
 
+import wandb
+
 import argparse
 import logging
 import math
@@ -21,7 +23,6 @@ from dinov2.utils.config import setup
 from dinov2.utils.utils import CosineScheduler
 
 from dinov2.train.ssl_meta_arch import SSLMetaArch
-
 
 torch.backends.cuda.matmul.allow_tf32 = True  # PyTorch 1.12 sets this to False by default
 logger = logging.getLogger("dinov2")
@@ -295,6 +296,18 @@ def do_train(cfg, model, resume=False):
 
 
 def main(args):
+    wandb.login()
+
+    run = wandb.init(
+    # Set the project where this run will be logged
+    project="my-awesome-project",
+    # Track hyperparameters and run metadata
+    config={
+        "learning_rate": lr,
+        "epochs": epochs,
+    },
+    )
+    
     cfg = setup(args)
 
     model = SSLMetaArch(cfg).to(torch.device("cuda"))
