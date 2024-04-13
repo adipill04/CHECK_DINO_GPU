@@ -133,6 +133,16 @@ def do_test(cfg, model, iteration):
 
 
 def do_train(cfg, model, resume=False):
+     run = wandb.init(
+    # Set the project where this run will be logged
+    project="my-awesome-project",
+    # Track hyperparameters and run metadata
+    config={
+        "lr": 0,
+        "epochs": OFFICIAL_EPOCH_LENGTH,
+    },
+    )
+    
     model.train()
     inputs_dtype = torch.half
     fp16_scaler = model.fp16_scaler  # for mixed precision training
@@ -234,6 +244,7 @@ def do_train(cfg, model, resume=False):
         # apply schedules
 
         lr = lr_schedule[iteration]
+        wandb.config["lr"] = lr
         wd = wd_schedule[iteration]
         mom = momentum_schedule[iteration]
         teacher_temp = teacher_temp_schedule[iteration]
@@ -297,16 +308,6 @@ def do_train(cfg, model, resume=False):
 
 def main(args):
     wandb.login()
-
-    run = wandb.init(
-    # Set the project where this run will be logged
-    project="my-awesome-project",
-    # Track hyperparameters and run metadata
-    config={
-        "learning_rate": lr,
-        "epochs": epochs,
-    },
-    )
     
     cfg = setup(args)
 
