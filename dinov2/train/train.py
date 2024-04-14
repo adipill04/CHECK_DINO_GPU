@@ -132,17 +132,7 @@ def do_test(cfg, model, iteration):
         torch.save({"teacher": new_state_dict}, teacher_ckp_path)
 
 
-def do_train(cfg, model, resume=False):
-     run = wandb.init(
-    # Set the project where this run will be logged
-    project="my-awesome-project",
-    # Track hyperparameters and run metadata
-    config={
-        "lr": 0,
-        "epochs": OFFICIAL_EPOCH_LENGTH,
-    },
-    )
-    
+def do_train(cfg, model, resume=False):    
     model.train()
     inputs_dtype = torch.half
     fp16_scaler = model.fp16_scaler  # for mixed precision training
@@ -244,11 +234,17 @@ def do_train(cfg, model, resume=False):
         # apply schedules
 
         lr = lr_schedule[iteration]
-        wandb.config["lr"] = lr
         wd = wd_schedule[iteration]
         mom = momentum_schedule[iteration]
         teacher_temp = teacher_temp_schedule[iteration]
         last_layer_lr = last_layer_lr_schedule[iteration]
+
+        #Update wandb hyperparameters to be tracked
+        wandb.config["lr"] = lr
+        wandb.config["wd"] = wd
+        wandb.config["mom"] = mom
+        wandb.config["teacher_temp"] = teacher_temp
+        
         apply_optim_scheduler(optimizer, lr, wd, last_layer_lr)
 
         # compute losses
@@ -286,7 +282,7 @@ def do_train(cfg, model, resume=False):
             logger.info("NaN detected")
             raise AssertionError
         losses_reduced = sum(loss for loss in loss_dict_reduced.values())
-
+        wandb.log({"loss": losses_reduced})
         metric_logger.update(lr=lr)
         metric_logger.update(wd=wd)
         metric_logger.update(mom=mom)
@@ -307,8 +303,21 @@ def do_train(cfg, model, resume=False):
 
 
 def main(args):
-    wandb.login()
-    
+    #wandb.login()
+
+    run = wandb.init(
+        # Set the project where this run will be logged
+        project="testProject1",
+        # Track hyperparameters and run metadata
+        config={
+            "lr": 0,
+            "epochs": cfg.train.OFFICIAL_EPOCH_LENGTH,
+            "wd": 0,
+            "mom": 0,
+            "teacher_temp": 0
+        },
+    )
+
     cfg = setup(args)
 
     model = SSLMetaArch(cfg).to(torch.device("cuda"))
