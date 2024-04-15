@@ -26,7 +26,7 @@ from dinov2.train.ssl_meta_arch import SSLMetaArch
 
 torch.backends.cuda.matmul.allow_tf32 = True  # PyTorch 1.12 sets this to False by default
 logger = logging.getLogger("dinov2")
-
+epochSize = ""
 
 def get_args_parser(add_help: bool = True):
     parser = argparse.ArgumentParser("DINOv2 training", add_help=add_help)
@@ -65,6 +65,7 @@ def build_optimizer(cfg, params_groups):
 
 def build_schedulers(cfg):
     OFFICIAL_EPOCH_LENGTH = cfg.train.OFFICIAL_EPOCH_LENGTH
+    epochSize = OFFICIAL_EPOCH_LENGTH
     lr = dict(
         base_value=cfg.optim["lr"],
         final_value=cfg.optim["min_lr"],
