@@ -304,20 +304,7 @@ def do_train(cfg, model, resume=False):
 
 def main(args):
     #wandb.login()
-
-    run = wandb.init(
-        # Set the project where this run will be logged
-        project="testProject1",
-        # Track hyperparameters and run metadata
-        config={
-            "lr": 0,
-            "epochs": cfg.train.OFFICIAL_EPOCH_LENGTH,
-            "wd": 0,
-            "mom": 0,
-            "teacher_temp": 0
-        },
-    )
-
+    
     cfg = setup(args)
 
     model = SSLMetaArch(cfg).to(torch.device("cuda"))
@@ -333,6 +320,20 @@ def main(args):
         )
         return do_test(cfg, model, f"manual_{iteration}")
 
+    
+    run = wandb.init(
+        # Set the project where this run will be logged
+        project="testProject1",
+        # Track hyperparameters and run metadata
+        config={
+            "lr": 0,
+            "epochs": cfg.train.OFFICIAL_EPOCH_LENGTH,
+            "wd": 0,
+            "mom": 0,
+            "teacher_temp": 0
+        },
+    )
+    
     do_train(cfg, model, resume=not args.no_resume)
 
 
