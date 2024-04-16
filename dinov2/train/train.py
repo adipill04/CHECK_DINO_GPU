@@ -64,7 +64,6 @@ def build_optimizer(cfg, params_groups):
 
 def build_schedulers(cfg):
     OFFICIAL_EPOCH_LENGTH = cfg.train.OFFICIAL_EPOCH_LENGTH
-    wandb.config["epochs"] = OFFICIAL_EPOCH_LENGTH
     lr = dict(
         base_value=cfg.optim["lr"],
         final_value=cfg.optim["min_lr"],
@@ -147,7 +146,7 @@ def do_train(cfg, model, resume=False):
         teacher_temp_schedule,
         last_layer_lr_schedule,
     ) = build_schedulers(cfg)
-
+    
     # checkpointer
     checkpointer = FSDPCheckpointer(model, cfg.train.output_dir, optimizer=optimizer, save_to_disk=True)
 
@@ -161,6 +160,21 @@ def do_train(cfg, model, resume=False):
         period=3 * OFFICIAL_EPOCH_LENGTH,
         max_iter=max_iter,
         max_to_keep=3,
+    )
+
+        #init wandb
+            #Update wandb hyperparameters to be tracked
+        run = wandb.init(
+        # Set the project where this run will be logged
+        project="testProject1",
+        # Track hyperparameters and run metadata
+        config={
+            "lr": lr_schedule,
+            "epochs": OFFICIAL_EPOCH_LENGTH,
+            "wd": wd_schedule,
+            "mom": momentum_schedule,
+            "teacher_temp": teacher_temp_schedule
+        },
     )
 
     # setup data preprocessing
@@ -238,12 +252,6 @@ def do_train(cfg, model, resume=False):
         mom = momentum_schedule[iteration]
         teacher_temp = teacher_temp_schedule[iteration]
         last_layer_lr = last_layer_lr_schedule[iteration]
-
-        #Update wandb hyperparameters to be tracked
-        wandb.config["lr"] = lr
-        wandb.config["wd"] = wd
-        wandb.config["mom"] = mom
-        wandb.config["teacher_temp"] = teacher_temp
         
         apply_optim_scheduler(optimizer, lr, wd, last_layer_lr)
 
@@ -319,20 +327,6 @@ def main(args):
             + 1
         )
         return do_test(cfg, model, f"manual_{iteration}")
-
-    
-    run = wandb.init(
-        # Set the project where this run will be logged
-        project="testProject1",
-        # Track hyperparameters and run metadata
-        config={
-            "lr": 0,
-            "epochs": 0,
-            "wd": 0,
-            "mom": 0,
-            "teacher_temp": 0
-        },
-    )
     
     do_train(cfg, model, resume=not args.no_resume)
 
