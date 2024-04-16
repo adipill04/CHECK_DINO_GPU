@@ -173,7 +173,8 @@ def do_train(cfg, model, resume=False):
             "epochs": OFFICIAL_EPOCH_LENGTH,
             "wd": wd_schedule,
             "mom": momentum_schedule,
-            "teacher_temp": teacher_temp_schedule
+            "teacher_temp": teacher_temp_schedule,
+            "batch_size_per_gpu" : 64
         },
     )
 
