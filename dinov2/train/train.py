@@ -162,21 +162,8 @@ def do_train(cfg, model, resume=False):
         max_to_keep=3,
     )
 
-        #init wandb
-            #Update wandb hyperparameters to be tracked
-        run = wandb.init(
-        # Set the project where this run will be logged
-        project="testProject1",
-        # Track hyperparameters and run metadata
-        config={
-            "lr": lr_schedule,
-            "epochs": OFFICIAL_EPOCH_LENGTH,
-            "wd": wd_schedule,
-            "mom": momentum_schedule,
-            "teacher_temp": teacher_temp_schedule,
-            "batch_size_per_gpu" : 64
-        },
-    )
+    #init wandb
+    run = wandb.init(project="testProject1", config={"lr": lr_schedule,"epochs": OFFICIAL_EPOCH_LENGTH,"wd": wd_schedule,"mom": momentum_schedule,"teacher_temp": teacher_temp_schedule,"batch_size_per_gpu" : 64},)
 
     # setup data preprocessing
 
