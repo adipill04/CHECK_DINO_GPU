@@ -157,12 +157,6 @@ def do_train(cfg, model, resume=False):
         teacher_temp_schedule,
         last_layer_lr_schedule,
     ) = build_schedulers(cfg)
-
-    #init wandb
-    run = wandb.init(project="dinov2_training", config={"lr": lrs,"epochs": OFFICIAL_EPOCH_LENGTH,"wd": wds,"mom": momentums,"teacher_temp": teacher_temps,"batch_size_per_gpu" : 64},)
-
-    #watch model
-    wandb.watch(model)
     
     # checkpointer
     checkpointer = FSDPCheckpointer(model, cfg.train.output_dir, optimizer=optimizer, save_to_disk=True)
@@ -180,8 +174,11 @@ def do_train(cfg, model, resume=False):
     )
 
     #init wandb
-    #run = wandb.init(project="testProject1", config={"lr": lr_schedule,"epochs": OFFICIAL_EPOCH_LENGTH,"wd": wd_schedule,"mom": momentum_schedule,"teacher_temp": teacher_temp_schedule,"batch_size_per_gpu" : 64},)
+    run = wandb.init(project="dinov2_training", config={"lr": lrs,"epochs": OFFICIAL_EPOCH_LENGTH,"wd": wds,"mom": momentums,"teacher_temp": teacher_temps,"batch_size_per_gpu" : 64},)
 
+    #watch model
+    wandb.watch(model)
+    
     # setup data preprocessing
 
     img_size = cfg.crops.global_crops_size
