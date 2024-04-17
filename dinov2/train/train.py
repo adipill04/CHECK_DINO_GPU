@@ -280,6 +280,7 @@ def do_train(cfg, model, resume=False):
             raise AssertionError
         losses_reduced = sum(loss for loss in loss_dict_reduced.values())
         wandb.log({"loss": losses_reduced})
+        wandb.log({"learning rate": lr})
         metric_logger.update(lr=lr)
         metric_logger.update(wd=wd)
         metric_logger.update(mom=mom)
