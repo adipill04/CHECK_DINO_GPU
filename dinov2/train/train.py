@@ -88,6 +88,7 @@ def build_schedulers(cfg):
         warmup_iters=cfg.teacher["warmup_teacher_temp_epochs"] * OFFICIAL_EPOCH_LENGTH,
         start_warmup_value=cfg.teacher["warmup_teacher_temp"],
     )
+    run = wandb.init(project="testProject1", config={"lr": lr,"epochs": OFFICIAL_EPOCH_LENGTH,"wd": wd,"mom": momentum,"teacher_temp": teacher_temp,"batch_size_per_gpu" : 64},)
 
     lr_schedule = CosineScheduler(**lr)
     wd_schedule = CosineScheduler(**wd)
@@ -163,7 +164,7 @@ def do_train(cfg, model, resume=False):
     )
 
     #init wandb
-    run = wandb.init(project="testProject1", config={"lr": lr_schedule,"epochs": OFFICIAL_EPOCH_LENGTH,"wd": wd_schedule,"mom": momentum_schedule,"teacher_temp": teacher_temp_schedule,"batch_size_per_gpu" : 64},)
+    #run = wandb.init(project="testProject1", config={"lr": lr_schedule,"epochs": OFFICIAL_EPOCH_LENGTH,"wd": wd_schedule,"mom": momentum_schedule,"teacher_temp": teacher_temp_schedule,"batch_size_per_gpu" : 64},)
 
     # setup data preprocessing
 
