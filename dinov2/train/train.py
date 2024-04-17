@@ -24,6 +24,11 @@ from dinov2.utils.utils import CosineScheduler
 
 from dinov2.train.ssl_meta_arch import SSLMetaArch
 
+lrs = 0
+wds = 0
+momentums = 0
+teacher_temps = 0
+
 torch.backends.cuda.matmul.allow_tf32 = True  # PyTorch 1.12 sets this to False by default
 logger = logging.getLogger("dinov2")
 
@@ -88,8 +93,13 @@ def build_schedulers(cfg):
         warmup_iters=cfg.teacher["warmup_teacher_temp_epochs"] * OFFICIAL_EPOCH_LENGTH,
         start_warmup_value=cfg.teacher["warmup_teacher_temp"],
     )
-    run = wandb.init(project="testProject1", config={"lr": lr,"epochs": OFFICIAL_EPOCH_LENGTH,"wd": wd,"mom": momentum,"teacher_temp": teacher_temp,"batch_size_per_gpu" : 64},)
 
+    #init global variables for wandb init
+    lrs = lr
+    wds = wd
+    momentums = momentum
+    teacher_temps = teacher_temp
+    
     lr_schedule = CosineScheduler(**lr)
     wd_schedule = CosineScheduler(**wd)
     momentum_schedule = CosineScheduler(**momentum)
@@ -148,6 +158,10 @@ def do_train(cfg, model, resume=False):
         last_layer_lr_schedule,
     ) = build_schedulers(cfg)
 
+    #init wandb
+    run = wandb.init(project="dinov2_training", config={"lr": lrs,"epochs": OFFICIAL_EPOCH_LENGTH,"wd": wds,"mom": momentums,"teacher_temp": teacher_temps,"batch_size_per_gpu" : 64},)
+
+    #watch model
     wandb.watch(model)
     
     # checkpointer
