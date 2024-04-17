@@ -147,6 +147,8 @@ def do_train(cfg, model, resume=False):
         teacher_temp_schedule,
         last_layer_lr_schedule,
     ) = build_schedulers(cfg)
+
+    wandb.watch(model)
     
     # checkpointer
     checkpointer = FSDPCheckpointer(model, cfg.train.output_dir, optimizer=optimizer, save_to_disk=True)
