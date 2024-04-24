@@ -14,6 +14,9 @@ from functools import partial
 from fvcore.common.checkpoint import PeriodicCheckpointer
 import torch
 
+from fairscale.nn.data_parallel import FullyShardedDataParallel as FSDP #newly added
+
+
 from dinov2.data import SamplerType, make_data_loader, make_dataset
 from dinov2.data import collate_data_and_cast, DataAugmentationDINO, MaskingGenerator
 import dinov2.distributed as distributed
@@ -323,6 +326,11 @@ def main(args):
     cfg = setup(args)
 
     model = SSLMetaArch(cfg).to(torch.device("cuda"))
+
+    ####
+    model = FSDP(model)
+    ####
+    
     model.prepare_for_distributed_training()
 
     logger.info("Model:\n{}".format(model))
